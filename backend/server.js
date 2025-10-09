@@ -1,23 +1,18 @@
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./db');       // File db.js để kết nối MongoDB
-const User = require('./models/User');   // Model User.js trong thư mục models
-
+const connectDB = require('./db');       
+const User = require('./models/User');   
 const app = express();
 
-// Kết nối database
 connectDB();
 
-// Middleware
 app.use(cors());
 app.use(express.json());  // Để parse JSON body từ request
 
-// Route test server
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-// GET tất cả users
 app.get('/users', async (req, res) => {
   try {
     const users = await User.find();  // Lấy tất cả user từ DB
@@ -28,7 +23,6 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// POST thêm user mới
 app.post('/users', async (req, res) => {
   try {
     console.log('Received POST /users with body:', req.body);
