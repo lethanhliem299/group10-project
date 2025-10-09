@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-// URL kết nối MongoDB (bạn có thể đổi tên database ở cuối)
-const MONGO_URI = 'mongodb://127.0.0.1:27017/group10db';
+// URL kết nối MongoDB Atlas (thay user, pass, cluster, dbname đúng của bạn)
+const MONGO_URI = 'mongodb+srv://tieuyen:Yen0407@cluster0.saieuiq.mongodb.net/group10db?retryWrites=true&w=majority';
 
 const connectDB = async () => {
   try {
