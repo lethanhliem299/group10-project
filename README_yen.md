@@ -1,7 +1,7 @@
 # README_YEN.md
 
 ## Thông tin cá nhân
-- Họ tên: Trần Thị Yến
+- Họ tên: Ngô Tiểu Yến
 - Vai trò: Database Developer (MongoDB)
 
 ## Nhiệm vụ chính
