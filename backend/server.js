@@ -1,4 +1,5 @@
 const express = require('express');
+database
 const cors = require('cors');
 const connectDB = require('./db');       
 const User = require('./models/User');   
@@ -39,4 +40,18 @@ app.post('/users', async (req, res) => {
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+const app = express();
+
+// Middleware để parse JSON
+app.use(express.json());
+
+// Import router
+const userRoutes = require('./routes/user');
+app.use('/users', userRoutes);
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+ backend
 });
