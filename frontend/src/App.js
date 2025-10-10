@@ -6,14 +6,14 @@ function App() {
   const [reload, setReload] = useState(false);
 
   const handleUserAdded = () => {
-    setReload(!reload);
+    setReload(!reload); // reload lại danh sách sau khi thêm/sửa/xóa
   };
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Quản lý người dùng</h1>
       <AddUser onUserAdded={handleUserAdded} />
-      <UserList reload={reload} />
+      <UserList reload={reload} onUserChanged={handleUserAdded} />
     </div>
   );
 }

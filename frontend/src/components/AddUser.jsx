@@ -7,6 +7,16 @@ function AddUser({ onUserAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!name.trim()) {
+      alert("Tên không được để trống!");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      alert("Email không hợp lệ!");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:5000/users", { name, email });
       setName("");
@@ -14,6 +24,7 @@ function AddUser({ onUserAdded }) {
       onUserAdded();
     } catch (error) {
       console.error("Lỗi khi thêm người dùng:", error);
+      alert("Không thể thêm người dùng. Kiểm tra lại backend!");
     }
   };
 
