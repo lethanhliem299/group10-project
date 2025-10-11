@@ -1,4 +1,12 @@
-// Đây là code frontend (Sinh viên 2)
+
+// code frontend
+
+/* code backend */
+
+
+
+
+
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
