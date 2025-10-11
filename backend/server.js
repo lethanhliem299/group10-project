@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+HEAD
 // server.js
 import express from "express";
 import mongoose from "mongoose";
@@ -41,7 +41,7 @@ app.post("/users", async (req, res) => {
 // 🚀 Khởi động server
 const PORT = 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
-=======
+
 // ==========================
 // server.js - Backend chính
 // ==========================
@@ -73,4 +73,4 @@ const PORT = 3000; // có thể đổi sang 5000 nếu cần
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
->>>>>>> backend
+backend
