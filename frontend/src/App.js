@@ -1,3 +1,5 @@
+// Đây là code frontend (Sinh viên 2)
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
