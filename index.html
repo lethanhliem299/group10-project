@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="vi">
+<body>
+  <h1>Danh sách User</h1>
+  <button onclick="loadUsers()">Tải danh sách</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function loadUsers() {
+      const res = await fetch("http://localhost:3000/users");
+      const data = await res.json();
+      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
