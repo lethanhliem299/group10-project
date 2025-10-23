@@ -1,33 +1,29 @@
-// ====== IMPORT ======
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 
-// ====== LOAD ENV ======
-dotenv.config({ path: __dirname + '/pro.env' });
+// ✅ Load file môi trường đúng vị trí
+dotenv.config({ path: path.join(__dirname, 'pro.env') });
 
-// ====== INIT APP ======
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
-
-// ====== MIDDLEWARE ======
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
-// ====== CONNECT MONGODB ======
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase';
+// ✅ Sử dụng biến môi trường thay vì ghi cứng
+const mongoURI = process.env.MONGODB_URI;
+
 mongoose.connect(mongoURI)
   .then(() => console.log('✅ Kết nối MongoDB thành công'))
-  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
+  .catch(err => console.log('❌ Lỗi MongoDB:', err));
 
-// ====== ROUTES ======
-const authRoutes = require('./routes/authRoutes');
+// ✅ Route Auth
 app.use('/api/auth', authRoutes);
 
-// ====== TEST ROUTE ======
-app.get('/', (req, res) => res.send('🚀 Server đang chạy tại cổng 5000'));
-
-// ====== START SERVER ======
-const PORT = 5000; // cổng 5000
-app.listen(PORT, () => console.log(`🚀 Server đang chạy tại cổng ${PORT}`));
+// ✅ Run Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server chạy tại cổng ${PORT}`));
