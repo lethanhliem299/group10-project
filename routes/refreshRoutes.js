@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const RefreshToken = require("../models/RefreshToken");
 const User = require("../models/User");
 
-// ✅ Refresh Access Token
 router.post("/refresh", async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -19,19 +18,12 @@ router.post("/refresh", async (req, res) => {
       const user = await User.findById(decoded.id);
       if (!user) return res.status(404).json({ message: "User không tồn tại" });
 
-      const accessToken = jwt.sign(
-        { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "15m" }
-      );
+      const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
-      res.json({
-        accessToken,
-        message: "Access token mới đã được cấp"
-      });
+      res.json({ accessToken, message: "Access token mới đã được cấp" });
     });
-  } catch (error) {
-    console.error("Refresh token lỗi:", error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Lỗi server!" });
   }
 });
