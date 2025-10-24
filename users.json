@@ -1,0 +1,7 @@
+[
+  { "id": 1, "fullname": "Thanh Liêm", "username": "Liem", "email": "liem@system.com", "role": "admin" },
+  { "id": 2, "fullname": "Minh Luân", "username": "Luân", "email": "luan@gmail.com", "role": "user" },
+  { "id": 3, "fullname": "Tiểu Yến", "username": "Yến", "email": "yen@yahoo.com", "role": "user" },
+  { "id": 4, "fullname": "Liêm 21", "username": "Thanh Liêm", "email": "L21@outlook.com", "role": "user" },
+  { "id": 5, "fullname": "Yến Ân", "username": "Ân", "email":"Anan@gmail.com", "role": "user" }
+]

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Danh sách người dùng</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    h2 { text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Danh sách người dùng (Admin)</h2>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Họ và tên</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    const users = [
+      { id: 1, fullname: "Thanh Liêm", username: "Liem", email: "liem@system.com", role: "admin" },
+      { id: 2, fullname: "Minh Luân", username: "Luân", email: "luan@gmail.com", role: "user" },
+      { id: 3, fullname: "Tiểu Yến", username: "Yến", email: "yen@yahoo.com", role: "user" },
+      { id: 4, fullname: "Liêm 21", username: "Thanh Liêm", email: "L21@outlook.com", role: "user" },
+      { id: 5, fullname: "Yến Ân", username: "Ân", email: "Anan@gmail.com", role: "user" }
+    ];
+
+    const tbody = document.querySelector('#userTable tbody');
+    users.forEach(user => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.fullname}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${user.role}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
