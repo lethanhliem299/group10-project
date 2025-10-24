@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Đăng nhập</title>
+</head>
+<body>
+  <h2>Form Đăng nhập</h2>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Mật khẩu"><br>
+  <button onclick="login()">Đăng nhập</button>
+  <p id="result"></p>
+
+  <script>
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      document.getElementById("result").innerText =
+        response.ok ? "Token: " + data.token : data.message;
+    }
+  </script>
+</body>
+</html>
