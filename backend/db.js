@@ -1,19 +1,14 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 
-dotenv.config({ path: __dirname + '/pro.env' });
-
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase';
+// URL kết nối MongoDB Atlas (thay user, pass, cluster, dbname đúng của bạn)
+const MONGO_URI = 'mongodb+srv://tieuyen:Yen0407@cluster0.saieuiq.mongodb.net/group10db?retryWrites=true&w=majority';
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('✅ Kết nối MongoDB thành công');
-  } catch (err) {
-    console.error('❌ Lỗi kết nối MongoDB:', err.message);
+    await mongoose.connect(MONGO_URI);
+    console.log('✅ MongoDB connected successfully');
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
   }
 };

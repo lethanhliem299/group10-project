@@ -1,33 +1,43 @@
-// ====== IMPORT ======
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
 
-// ====== LOAD ENV ======
-dotenv.config({ path: __dirname + '/pro.env' });
+// ✅ Import routes đúng với vị trí server.js
+import userRoutes from "./routes/user.js";
+import profileRoutes from "./routes/profileRoutes.js"; // nếu bạn có route profile
+import authRoutes from "./routes/authRoutes.js"; // nếu có route auth
 
-// ====== INIT APP ======
 const app = express();
 
-// ====== MIDDLEWARE ======
+// -------------------
+// Middleware
+// -------------------
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ====== CONNECT MONGODB ======
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase';
-mongoose.connect(mongoURI)
-  .then(() => console.log('✅ Kết nối MongoDB thành công'))
-  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
+// -------------------
+// MongoDB connection
+// -------------------
+mongoose.connect("mongodb://localhost:27017/group10")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ====== ROUTES ======
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
+// -------------------
+// Routes
+// -------------------
+app.use("/users", userRoutes);
+app.use("/auth", authRoutes);       // route auth (register, login)
+app.use("/profile", profileRoutes); // route profile (get/update profile)
 
-// ====== TEST ROUTE ======
-app.get('/', (req, res) => res.send('🚀 Server đang chạy tại cổng 5000'));
+// -------------------
+// Root endpoint
+// -------------------
+app.get("/", (req, res) => {
+  res.send("✅ Backend RBAC server running on localhost:5000");
+});
 
-// ====== START SERVER ======
-const PORT = 5000; // cổng 5000
-app.listen(PORT, () => console.log(`🚀 Server đang chạy tại cổng ${PORT}`));
+// -------------------
+// Start server
+// -------------------
+const PORT = 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
