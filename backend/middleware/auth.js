@@ -1,14 +1,16 @@
-const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken";
 
-module.exports = function (req, res, next) {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) return res.status(401).json({ message: 'Không có token, truy cập bị từ chối!' });
+export const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer "))
+    return res.status(401).json({ message: "Không có token" });
 
+  const token = authHeader.split(" ")[1];
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    const decoded = jwt.verify(token, "your_jwt_secret");
+    req.user = decoded;
     next();
-  } catch {
-    res.status(400).json({ message: 'Token không hợp lệ!' });
+  } catch (err) {
+    res.status(401).json({ message: "Token không hợp lệ" });
   }
 };

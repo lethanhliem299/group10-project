@@ -1,70 +1,96 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const User = require('../models/User');
-const auth = require('../middleware/auth');
+import express from "express";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ====== SIGNUP ======
-router.post('/signup', async (req, res) => {
+// =======================
+// REGISTER
+// =======================
+router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role, age } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email đã tồn tại' });
+    const { name, email, password, role } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword, role: role || 'user', age: age || 18 });
+    // Kiểm tra user đã tồn tại chưa
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: "Người dùng đã tồn tại" });
 
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    // Tạo user mới
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: role || "User"
+    });
 
-    res.status(201).json({ message: 'Đăng ký thành công', token, user: newUser });
+    res.status(201).json({ message: "Đăng ký thành công", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server', error: err.message });
+    res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 });
 
-// ====== FORGOT PASSWORD ======
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: 'Email không tồn tại' });
-
-  const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  res.json({ message: 'Token reset mật khẩu', resetToken });
-});
-
-// ====== RESET PASSWORD ======
-router.post('/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
+// =======================
+// LOGIN
+// =======================
+router.post("/login", async (req, res) => {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.id);
-    if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+    const { email, password } = req.body;
 
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-    res.json({ message: 'Đặt lại mật khẩu thành công' });
-  } catch {
-    res.status(400).json({ message: 'Token không hợp lệ hoặc hết hạn' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      "your_jwt_secret",
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 });
 
-// ====== UPLOAD AVATAR ======
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, `${req.user.id}-${Date.now()}-${file.originalname}`)
-});
-const upload = multer({ storage });
-
-router.post('/upload-avatar', auth, upload.single('avatar'), async (req, res) => {
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ message: 'User không tồn tại' });
-
-  user.avatar = req.file.path;
-  await user.save();
-  res.json({ message: 'Upload thành công', avatar: user.avatar });
+// =======================
+// GET PROFILE
+// =======================
+router.get("/profile", authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "Người dùng không tồn tại" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
 });
 
-module.exports = router;
+// =======================
+// UPDATE PROFILE
+// =======================
+router.put("/profile", authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "Người dùng không tồn tại" });
+
+    const { name, email, password } = req.body;
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (password) user.password = password; // sẽ được hash ở pre-save hook
+
+    await user.save();
+
+    res.json({ message: "Cập nhật thành công", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+});
+
+export default router;
