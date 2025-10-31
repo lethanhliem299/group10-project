@@ -6,6 +6,11 @@ import cors from "cors";
 import userRoutes from "./routes/user.js";
 import profileRoutes from "./routes/profileRoutes.js"; // nếu bạn có route profile
 import authRoutes from "./routes/authRoutes.js"; // nếu có route auth
+import logRoutes from "./routes/logRoutes.js";
+
+// Import middleware
+import logRequest from "./middleware/logActivity.js";
+import { apiRateLimiter } from "./middleware/rateLimiter.js";
 
 const app = express();
 
@@ -14,6 +19,12 @@ const app = express();
 // -------------------
 app.use(cors());
 app.use(express.json());
+
+// Global rate limiter - áp dụng cho tất cả routes
+app.use(apiRateLimiter);
+
+// Activity logging - log tất cả requests
+app.use(logRequest);
 
 // -------------------
 // MongoDB connection
@@ -28,6 +39,7 @@ mongoose.connect("mongodb://localhost:27017/group10")
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);       // route auth (register, login)
 app.use("/profile", profileRoutes); // route profile (get/update profile)
+app.use("/api/logs", logRoutes);    // Activity logs (admin + user)
 
 // -------------------
 // Root endpoint
