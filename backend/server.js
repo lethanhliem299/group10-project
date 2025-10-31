@@ -4,7 +4,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 // Load environment variables
-dotenv.config({ path: "../pro.env" });
+// Production: load từ .env file
+// Development: load từ pro.env file
+dotenv.config({ path: process.env.NODE_ENV === 'production' ? '.env' : '../pro.env' });
 
 // ✅ Import routes
 import userRoutes from "./routes/user.js";
