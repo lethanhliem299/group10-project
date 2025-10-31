@@ -6,7 +6,16 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, default: "User" },
+  role: { 
+    type: String, 
+    enum: ["user", "admin", "moderator"], 
+    default: "user" 
+  },
+  avatar: { type: String, default: "" },
+  avatarPublicId: { type: String, default: "" },
+  isActive: { type: Boolean, default: true },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 }, { timestamps: true });
 
 // Hash password trước khi save

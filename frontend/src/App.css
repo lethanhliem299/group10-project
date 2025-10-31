@@ -1,38 +1,72 @@
-.App {
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #fffbf0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+code {
+  font-family: 'Courier New', Courier, monospace;
 }
 
-.App-header {
-  background-color: #282c34;
+/* Global styles */
+.page-container {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background: #fffbf0;
 }
 
-.App-link {
-  color: #61dafb;
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.page-header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  color: #2d3748;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.page-header p {
+  font-size: 1rem;
+  color: #718096;
+}
+
+/* Role badges */
+.role-badge {
+  padding: 5px 14px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.role-user {
+  background: #e6fffa;
+  color: #234e52;
+}
+
+.role-admin {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.role-moderator {
+  background: #fffaf0;
+  color: #c05621;
 }

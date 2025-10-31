@@ -2,6 +2,9 @@ import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
 import { checkRole } from "../middleware/checkRole.js";
 import User from "../models/User.js";
+import verifyToken from "../middleware/verifyToken.js";
+import upload from "../middleware/uploadAvatar.js";
+import { uploadAvatar, deleteAvatar } from "../controllers/avatarController.js";
 
 const router = express.Router();
 
@@ -85,5 +88,15 @@ router.delete("/:id", authenticate, checkRole(["Admin"]), async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 });
+
+// ==========================================
+// AVATAR ROUTES
+// ==========================================
+
+// Upload Avatar
+router.post("/avatar", verifyToken, upload.single("avatar"), uploadAvatar);
+
+// Delete Avatar
+router.delete("/avatar", verifyToken, deleteAvatar);
 
 export default router;

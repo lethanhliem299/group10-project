@@ -1,9 +1,8 @@
 {
   "info": {
-    "name": "User Management API - Complete Collection",
-    "description": "Complete API collection for User Management System with JWT Authentication, RBAC, Avatar Upload, Password Reset, Logging, and Rate Limiting",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "12345678"
+    "name": "User Management API - RBAC Complete",
+    "description": "API đầy đủ cho Hệ thống Quản lý Người dùng với JWT Authentication, RBAC (Role-Based Access Control), Refresh Token, Avatar Upload, Password Reset, Activity Logs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
     "type": "bearer",
@@ -48,9 +47,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    console.log('✅ Register successful');",
-                  "}"
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
                 ]
               }
             }
@@ -60,7 +59,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"user\"\n}",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"user@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"user\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -71,7 +70,52 @@
               "raw": "{{baseUrl}}/auth/register",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "register"]
-            }
+            },
+            "description": "Đăng ký tài khoản mới. Role có thể là: user, admin, moderator"
+          }
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Đăng ký tài khoản admin để test RBAC"
+          }
+        },
+        {
+          "name": "Register Moderator",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Moderator User\",\n  \"email\": \"moderator@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"moderator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Đăng ký tài khoản moderator để test RBAC"
           }
         },
         {
@@ -81,15 +125,22 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
-                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
-                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
-                  "    console.log('✅ Login successful');",
-                  "    console.log('Access Token:', jsonData.accessToken);",
-                  "    console.log('Refresh Token:', jsonData.refreshToken);",
-                  "}"
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                  "pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                  "pm.collectionVariables.set(\"userId\", jsonData.user.id || jsonData.user._id);",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has accessToken\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has refreshToken\", function () {",
+                  "    pm.expect(jsonData.refreshToken).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -99,7 +150,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"123456\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -110,7 +161,8 @@
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
-            }
+            },
+            "description": "Đăng nhập và nhận accessToken + refreshToken"
           }
         },
         {
@@ -120,19 +172,21 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
-                  "    console.log('✅ Token refreshed');",
-                  "}"
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has new accessToken\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.exist;",
+                  "});"
                 ]
               }
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [],
             "body": {
@@ -148,15 +202,13 @@
               "raw": "{{baseUrl}}/auth/refresh",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "refresh"]
-            }
+            },
+            "description": "Làm mới access token khi hết hạn"
           }
         },
         {
           "name": "Logout",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [],
             "body": {
@@ -172,41 +224,79 @@
               "raw": "{{baseUrl}}/auth/logout",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "logout"]
-            }
+            },
+            "description": "Đăng xuất - thu hồi refresh token"
           }
         },
         {
           "name": "Logout All Devices",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/auth/logout-all",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "logout-all"]
-            }
+            },
+            "description": "Đăng xuất khỏi tất cả thiết bị - xóa tất cả refresh tokens"
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "2. Profile (User)",
+      "item": [
         {
           "name": "Get Profile",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/auth/profile",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "profile"]
-            }
+            },
+            "description": "Xem thông tin profile của chính mình (Cần đăng nhập)"
           }
         },
         {
           "name": "Update Profile",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@test.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -217,174 +307,79 @@
               "raw": "{{baseUrl}}/auth/profile",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "profile"]
-            }
+            },
+            "description": "Cập nhật thông tin profile"
           }
         }
       ]
     },
     {
-      "name": "2. Password Management",
-      "item": [
-        {
-          "name": "Forgot Password",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/password/forgot-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "password", "forgot-password"]
-            }
-          }
-        },
-        {
-          "name": "Verify Reset Token",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/password/verify-token/:token",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "password", "verify-token", ":token"],
-              "variable": [
-                {
-                  "key": "token",
-                  "value": "your_reset_token_here"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"password\": \"newpassword123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/password/reset-password/:token",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "password", "reset-password", ":token"],
-              "variable": [
-                {
-                  "key": "token",
-                  "value": "your_reset_token_here"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/password/change-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "password", "change-password"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Admin - User Management",
+      "name": "3. Admin - User Management (RBAC)",
       "item": [
         {
           "name": "Get All Users",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/users",
+              "raw": "{{baseUrl}}/admin/users",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users"]
-            }
+              "path": ["admin", "users"]
+            },
+            "description": "📌 CHỈ ADMIN - Lấy danh sách tất cả users\n\nTest phân quyền:\n- Login với admin → 200 OK ✅\n- Login với user → 403 Forbidden ❌"
           }
         },
         {
           "name": "Get User By ID",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/users/:id",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"user\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "path": ["admin", "users", "{{userId}}"]
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/admin/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users"]
-            }
+            "description": "📌 CHỈ ADMIN - Xem thông tin chi tiết của user"
           }
         },
         {
           "name": "Update User",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"role\": \"moderator\",\n  \"isActive\": true\n}",
+              "raw": "{\n  \"name\": \"Updated User Name\",\n  \"email\": \"updated@test.com\",\n  \"role\": \"moderator\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -392,44 +387,54 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/admin/users/:id",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
+              "path": ["admin", "users", "{{userId}}"]
+            },
+            "description": "📌 CHỈ ADMIN - Cập nhật thông tin user (bao gồm cả role)"
           }
         },
         {
           "name": "Delete User",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/users/:id",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
+              "path": ["admin", "users", "{{userId}}"]
+            },
+            "description": "📌 CHỈ ADMIN - Xóa user\n\nLưu ý:\n- Không thể xóa chính mình\n- Xóa user sẽ xóa tất cả refresh tokens của user đó"
           }
         },
         {
-          "name": "Change User Role",
+          "name": "Toggle User Active Status",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PATCH",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"role\": \"admin\"\n}",
+              "raw": "{\n  \"isActive\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -437,124 +442,134 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/admin/users/:id/role",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/toggle-active",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users", ":id", "role"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
+              "path": ["admin", "users", "{{userId}}", "toggle-active"]
+            },
+            "description": "📌 CHỈ ADMIN - Kích hoạt/vô hiệu hóa user\n\nKhi vô hiệu hóa (isActive: false):\n- User không thể đăng nhập\n- Tất cả refresh tokens bị xóa\n- User bị logout khỏi tất cả thiết bị"
           }
         },
         {
-          "name": "Toggle User Status",
+          "name": "Get User Sessions",
           "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/admin/users/:id/toggle-status",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "users", ":id", "toggle-status"],
-              "variable": [
+            "auth": {
+              "type": "bearer",
+              "bearer": [
                 {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "4. Moderator - Read Only",
-      "item": [
-        {
-          "name": "Get All Users (Moderator)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/moderator/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "moderator", "users"]
-            }
-          }
-        },
-        {
-          "name": "Get User By ID (Moderator)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/moderator/users/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "moderator", "users", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{userId}}"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "5. Avatar Upload",
-      "item": [
-        {
-          "name": "Upload Avatar",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "avatar",
-                  "type": "file",
-                  "src": []
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
                 }
               ]
             },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users/avatar",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/sessions",
               "host": ["{{baseUrl}}"],
-              "path": ["users", "avatar"]
-            }
+              "path": ["admin", "users", "{{userId}}", "sessions"]
+            },
+            "description": "📌 CHỈ ADMIN - Xem tất cả sessions (refresh tokens) của user\n\nResponse:\n- totalSessions: Số lượng thiết bị đang đăng nhập\n- sessions: Danh sách refresh tokens với thông tin device"
           }
         },
         {
-          "name": "Delete Avatar",
+          "name": "Delete User Sessions",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users/avatar",
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/sessions",
               "host": ["{{baseUrl}}"],
-              "path": ["users", "avatar"]
-            }
+              "path": ["admin", "users", "{{userId}}", "sessions"]
+            },
+            "description": "📌 CHỈ ADMIN - Xóa tất cả sessions của user\n\nKết quả: User bị logout khỏi tất cả thiết bị"
           }
         }
       ]
     },
     {
-      "name": "6. Activity Logs",
+      "name": "4. Moderator (RBAC)",
       "item": [
         {
-          "name": "Get My Logs",
+          "name": "Get All Users (Read-only)",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/logs/my-logs?page=1&limit=20",
+              "raw": "{{baseUrl}}/moderator/users",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "logs", "my-logs"],
+              "path": ["moderator", "users"]
+            },
+            "description": "📌 ADMIN + MODERATOR - Xem danh sách users (chỉ xem, không chỉnh sửa)\n\nTest phân quyền:\n- Login với admin → 200 OK ✅\n- Login với moderator → 200 OK ✅\n- Login với user → 403 Forbidden ❌"
+          }
+        },
+        {
+          "name": "Get User By ID (Read-only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/moderator/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["moderator", "users", "{{userId}}"]
+            },
+            "description": "📌 ADMIN + MODERATOR - Xem chi tiết user (read-only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Activity Logs (Admin Only)",
+      "item": [
+        {
+          "name": "Get Logs (All)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["logs"],
               "query": [
                 {
                   "key": "page",
@@ -565,116 +580,102 @@
                   "value": "20"
                 }
               ]
-            }
+            },
+            "description": "📌 CHỈ ADMIN - Xem tất cả activity logs với pagination"
           }
         },
         {
-          "name": "Get All Logs (Admin)",
+          "name": "Get Logs (Filter by User)",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/logs?page=1&limit=50&method=POST",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "logs"],
-              "query": [
+            "auth": {
+              "type": "bearer",
+              "bearer": [
                 {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "50"
-                },
-                {
-                  "key": "userId",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "action",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "method",
-                  "value": "POST",
-                  "disabled": true
-                },
-                {
-                  "key": "startDate",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "endDate",
-                  "value": "",
-                  "disabled": true
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
                 }
               ]
-            }
-          }
-        },
-        {
-          "name": "Get User Logs (Admin)",
-          "request": {
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/logs/user/:userId?page=1&limit=50",
+              "raw": "{{baseUrl}}/logs?userId={{userId}}&page=1&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "logs", "user", ":userId"],
+              "path": ["logs"],
               "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "50"
-                }
-              ],
-              "variable": [
                 {
                   "key": "userId",
                   "value": "{{userId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
                 }
               ]
-            }
+            },
+            "description": "📌 CHỈ ADMIN - Lọc logs theo User ID"
           }
         },
         {
-          "name": "Get Log Stats (Admin)",
+          "name": "Get Logs (Filter by Action)",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/logs/stats?startDate=2025-01-01&endDate=2025-12-31",
+              "raw": "{{baseUrl}}/logs?action=login&page=1&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "logs", "stats"],
+              "path": ["logs"],
               "query": [
                 {
-                  "key": "startDate",
-                  "value": "2025-01-01",
-                  "disabled": true
+                  "key": "action",
+                  "value": "login"
                 },
                 {
-                  "key": "endDate",
-                  "value": "2025-12-31",
-                  "disabled": true
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
                 }
               ]
-            }
+            },
+            "description": "📌 CHỈ ADMIN - Lọc logs theo Action (login, logout, register, update, delete...)"
           }
         },
         {
-          "name": "Clear Old Logs (Admin)",
+          "name": "Delete Old Logs",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"days\": 30\n}",
+              "raw": "{\n  \"olderThan\": 30\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -682,14 +683,127 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/logs/clear",
+              "raw": "{{baseUrl}}/logs",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "logs", "clear"]
-            }
+              "path": ["logs"]
+            },
+            "description": "📌 CHỈ ADMIN - Xóa logs cũ hơn N ngày"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Test RBAC Scenarios",
+      "item": [
+        {
+          "name": "❌ User calls Admin API (Should Fail)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "❌ TEST FAIL CASE\n\n1. Login với user@test.com\n2. Gọi API này\n3. Expected: 403 Forbidden\n4. Message: \"Chỉ admin mới có quyền truy cập\""
+          }
+        },
+        {
+          "name": "✅ Admin calls Admin API (Should Success)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "✅ TEST SUCCESS CASE\n\n1. Login với admin@test.com\n2. Gọi API này\n3. Expected: 200 OK\n4. Response: [...danh sách users...]"
+          }
+        },
+        {
+          "name": "✅ Moderator calls Moderator API (Should Success)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/moderator/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["moderator", "users"]
+            },
+            "description": "✅ TEST SUCCESS CASE\n\n1. Login với moderator@test.com\n2. Gọi API này\n3. Expected: 200 OK\n4. Response: [...danh sách users...] (read-only)"
+          }
+        },
+        {
+          "name": "❌ Moderator calls Admin API (Should Fail)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "❌ TEST FAIL CASE\n\n1. Login với moderator@test.com\n2. Gọi API này\n3. Expected: 403 Forbidden\n4. Message: \"Chỉ admin mới có quyền truy cập\""
+          }
+        },
+        {
+          "name": "❌ No Token (Should Fail)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "❌ TEST UNAUTHORIZED CASE\n\n1. Không gửi token\n2. Gọi API này\n3. Expected: 401 Unauthorized\n4. Message: \"No token provided\""
           }
         }
       ]
     }
   ]
 }
-

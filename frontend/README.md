@@ -1,70 +1,176 @@
-# Getting Started with Create React App
+# 🎉 User Management System - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Hệ thống quản lý người dùng hoàn chỉnh với React, Redux, Protected Routes và Refresh Token.
 
-## Available Scripts
+## 📋 Tính năng
 
-In the project directory, you can run:
+### 🔐 Authentication
+- ✅ Đăng ký (Register)
+- ✅ Đăng nhập (Login)
+- ✅ Tự động refresh token khi hết hạn
+- ✅ Logout (thu hồi refresh token)
 
-### `npm start`
+### 👤 Profile Management
+- ✅ Xem profile
+- ✅ Chỉnh sửa thông tin (tên, email)
+- ✅ Upload/Delete avatar
+- ✅ Đổi mật khẩu
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 👥 User Management (Admin Only)
+- ✅ Xem danh sách tất cả users
+- ✅ Chỉnh sửa thông tin user
+- ✅ Kích hoạt/Vô hiệu hóa user
+- ✅ Xóa user
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 📊 Activity Logs (Admin Only)
+- ✅ Xem lịch sử hoạt động của users
+- ✅ Lọc theo User ID, Action
+- ✅ Phân trang
 
-### `npm test`
+## 🚀 Cách chạy
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Cài đặt dependencies
+\`\`\`bash
+npm install
+\`\`\`
 
-### `npm run build`
+### 2. Chạy frontend
+\`\`\`bash
+npm start
+\`\`\`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Frontend sẽ chạy tại: `http://localhost:3000`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 📁 Cấu trúc thư mục
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+\`\`\`
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.js          # Navigation bar
+│   │   ├── Navbar.css
+│   │   ├── ProtectedRoute.js  # Protected route component
+│   │   ├── Auth.js            # Auth component (legacy)
+│   │   └── Auth.css
+│   ├── pages/
+│   │   ├── Login.js           # Trang đăng nhập
+│   │   ├── Register.js        # Trang đăng ký
+│   │   ├── Dashboard.js       # Trang dashboard
+│   │   ├── Profile.js         # Trang profile
+│   │   ├── UserManagement.js  # Trang quản lý users (Admin)
+│   │   ├── ActivityLogs.js    # Trang xem logs (Admin)
+│   │   └── *.css              # CSS files
+│   ├── utils/
+│   │   └── axiosConfig.js     # Axios interceptor (auto refresh token)
+│   ├── App.js                 # Main app với routing
+│   ├── App.css
+│   └── index.js
+└── package.json
+\`\`\`
 
-### `npm run eject`
+## 🔑 Phân quyền
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### User (user)
+- ✅ Xem dashboard
+- ✅ Quản lý profile cá nhân
+- ❌ Không truy cập được User Management
+- ❌ Không truy cập được Activity Logs
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Admin (admin)
+- ✅ Tất cả quyền của User
+- ✅ Quản lý tất cả users
+- ✅ Xem activity logs
+- ✅ Kích hoạt/vô hiệu hóa users
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Moderator (moderator)
+- ✅ Xem dashboard
+- ✅ Quản lý profile cá nhân
+- ✅ Xem danh sách users (read-only)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🎨 Giao diện
 
-## Learn More
+Giao diện được thiết kế theo phong cách **Mangools**:
+- Màu be/cream (#fffbf0) cho background
+- Màu xanh lá (#48bb78) cho buttons chính
+- Card trắng với shadow mềm mại
+- Typography rõ ràng, dễ đọc
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔄 Auto Refresh Token
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Hệ thống tự động refresh token khi:
+1. Access token hết hạn (15 phút)
+2. API trả về lỗi 401 Unauthorized
+3. Axios interceptor tự động gọi `/auth/refresh`
+4. Lưu access token mới vào localStorage
+5. Retry request ban đầu với token mới
 
-### Code Splitting
+Nếu refresh token cũng hết hạn → Logout tự động
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📝 API Endpoints được sử dụng
 
-### Analyzing the Bundle Size
+### Auth
+- `POST /auth/register` - Đăng ký
+- `POST /auth/login` - Đăng nhập
+- `POST /auth/refresh` - Refresh token
+- `POST /auth/logout` - Đăng xuất
+- `GET /auth/profile` - Lấy profile
+- `PUT /auth/profile` - Cập nhật profile
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Password
+- `POST /password/change-password` - Đổi mật khẩu
 
-### Making a Progressive Web App
+### Avatar
+- `POST /users/avatar` - Upload avatar
+- `DELETE /users/avatar` - Xóa avatar
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Admin
+- `GET /admin/users` - Lấy danh sách users
+- `PUT /admin/users/:id` - Cập nhật user
+- `DELETE /admin/users/:id` - Xóa user
+- `PATCH /admin/users/:id/toggle-active` - Kích hoạt/vô hiệu hóa user
 
-### Advanced Configuration
+### Logs
+- `GET /logs` - Lấy activity logs (có phân trang)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🧪 Test hệ thống
 
-### Deployment
+### 1. Test đăng nhập/đăng ký
+1. Truy cập `http://localhost:3000`
+2. Nhấn "Sign up" để đăng ký tài khoản mới
+3. Đăng nhập với tài khoản vừa tạo
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 2. Test refresh token
+1. Đăng nhập thành công
+2. Mở DevTools (F12) → Console
+3. Nhấn "🔄 Reload Profile"
+4. Đợi 15 phút (hoặc giảm thời gian expire trong backend)
+5. Nhấn lại "🔄 Reload Profile"
+6. Console sẽ hiện: "🔄 Access token hết hạn, đang refresh..."
+7. Token mới được lưu tự động
 
-### `npm run build` fails to minify
+### 3. Test phân quyền
+1. Đăng nhập với tài khoản **user** → Không thấy menu "Users" và "Logs"
+2. Đăng nhập với tài khoản **admin** → Thấy tất cả menu
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 4. Test profile management
+1. Vào trang Profile
+2. Upload avatar → Xem ảnh hiển thị
+3. Chỉnh sửa tên, email → Lưu
+4. Đổi mật khẩu → Logout → Login lại với mật khẩu mới
+
+## 🎯 Tips
+
+- Access token hết hạn sau **15 phút**
+- Refresh token hết hạn sau **7 ngày**
+- Tất cả requests đều tự động thêm Authorization header
+- Không cần lo logout khi token hết hạn, hệ thống tự động refresh
+- Admin có thể vô hiệu hóa user bằng nút toggle trong User Management
+
+## 📞 Liên hệ
+
+Nếu có vấn đề, liên hệ team phát triển!
+
+---
+
+Made with ❤️ by Group 10
+\`\`\`
