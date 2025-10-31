@@ -1,5 +1,11 @@
 import User from "../models/User.js";
-import jwt from "jsonwebtoken";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+  revokeRefreshToken,
+  revokeAllUserTokens,
+} from "../utils/jwt.js";
 
 export const register = async (req, res) => {
   try {
@@ -36,14 +42,16 @@ export const login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
     if (!isMatch) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      "your_jwt_secret",
-      { expiresIn: "1d" }
-    );
+    // Generate Access Token & Refresh Token
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = await generateRefreshToken(user._id, {
+      userAgent: req.headers["user-agent"],
+      ip: req.ip,
+    });
 
     res.json({
-      token,
+      accessToken,
+      refreshToken,
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
@@ -78,6 +86,58 @@ export const updateProfile = async (req, res) => {
       message: "Cập nhật thành công", 
       user: { id: user._id, name: user.name, email: user.email, role: user.role } 
     });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// Refresh Token
+export const refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh token is required" });
+    }
+
+    const tokenData = await verifyRefreshToken(refreshToken);
+    const user = await User.findById(tokenData.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newAccessToken = generateAccessToken(user._id, user.role);
+
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    res.status(401).json({ message: err.message });
+  }
+};
+
+// Logout (revoke 1 token)
+export const logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: "Refresh token is required" });
+    }
+
+    await revokeRefreshToken(refreshToken);
+
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// Logout All (revoke tất cả token của user)
+export const logoutAll = async (req, res) => {
+  try {
+    await revokeAllUserTokens(req.user.id);
+
+    res.json({ message: "Logged out from all devices" });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
