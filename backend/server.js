@@ -6,6 +6,7 @@ import cors from "cors";
 import userRoutes from "./routes/user.js";
 import profileRoutes from "./routes/profileRoutes.js"; // nếu bạn có route profile
 import authRoutes from "./routes/authRoutes.js"; // nếu có route auth
+import passwordRoutes from "./routes/passwordRoutes.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ mongoose.connect("mongodb://localhost:27017/group10")
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);       // route auth (register, login)
 app.use("/profile", profileRoutes); // route profile (get/update profile)
+app.use("/api/password", passwordRoutes); // Password management (forgot, reset, change)
 
 // -------------------
 // Root endpoint
