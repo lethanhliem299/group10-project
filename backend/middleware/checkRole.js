@@ -1,7 +1,17 @@
-export const checkRole = (roles) => (req, res, next) => {
-  if (!req.user || !req.user.role)
-    return res.status(401).json({ message: "Role không xác định" });
-  
-  if (roles.includes(req.user.role)) next();
-  else res.status(403).json({ message: "Không đủ quyền" });
+const checkRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized - No user found" });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        message: `Access denied. Required roles: ${allowedRoles.join(", ")}` 
+      });
+    }
+
+    next();
+  };
 };
+
+export default checkRole;
